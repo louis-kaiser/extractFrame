@@ -37,7 +37,6 @@ struct CameraView: View {
                 Image(nsImage: frame)
                     .resizable()
                     .aspectRatio(contentMode: .fit)
-                    .frame(width: 400, height: 300)
             } else {
                 Text("Waiting for camera feed...")
             }
@@ -56,12 +55,12 @@ struct FramesView: View {
     
     var body: some View {
         ScrollView(.horizontal) {
-            HStack {
+            ZStack {
                 ForEach(0..<30) { index in
                     Image(nsImage: cameraViewModel.frames[index])
                         .resizable()
-                        .frame(width: 100, height: 100)
-                        .border(Color.black)
+                        .blendMode(.screen) // screen or lighten
+                        .aspectRatio(contentMode: .fit)
                 }
             }
         }
