@@ -87,9 +87,22 @@ class CameraViewModel: NSObject, ObservableObject, AVCaptureVideoDataOutputSampl
         let ciImage = CIImage(cvImageBuffer: imageBuffer)
         let context = CIContext()
         
+        // Blur Filter
+            // Apply contrast adjustment to enhance the mask
+            let contrastFilter = CIFilter(name: "CIColorControls")!
+            contrastFilter.setValue(ciImage, forKey: kCIInputImageKey)
+            contrastFilter.setValue(2.0, forKey: kCIInputContrastKey) // Adjust contrast as needed
+            guard let contrastAdjusted = contrastFilter.outputImage else { return }
+            
+            // Apply gaussian blur for smoothing
+            let blurFilter = CIFilter(name: "CIGaussianBlur")!
+            blurFilter.setValue(contrastAdjusted, forKey: kCIInputImageKey)
+            blurFilter.setValue(5.0, forKey: kCIInputRadiusKey) // Adjust blur radius as needed
+            guard let blurredImage = blurFilter.outputImage else { return }
+        
         // Apply threshold filter
         let thresholdFilter = CIFilter(name: "CIColorThreshold")!
-        thresholdFilter.setValue(ciImage, forKey: kCIInputImageKey)
+        thresholdFilter.setValue(blurredImage, forKey: kCIInputImageKey) // Apply Blur Filter
         thresholdFilter.setValue(0.7, forKey: "inputThreshold")
         guard let thresholdedImage = thresholdFilter.outputImage else { return }
 
