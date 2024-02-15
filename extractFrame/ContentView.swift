@@ -109,9 +109,19 @@ class CameraViewModel: NSObject, ObservableObject, AVCaptureVideoDataOutputSampl
     func captureOutput(_ output: AVCaptureOutput, didOutput sampleBuffer: CMSampleBuffer, from connection: AVCaptureConnection) {
         guard let imageBuffer = CMSampleBufferGetImageBuffer(sampleBuffer) else { return }
         let ciImage = CIImage(cvImageBuffer: imageBuffer)
-        let cgImage = CIContext().createCGImage(ciImage, from: ciImage.extent)
+        let context = CIContext()
+        
+        // Apply threshold filter
+        let thresholdFilter = CIFilter(name: "CIColorThreshold")!
+        thresholdFilter.setValue(ciImage, forKey: kCIInputImageKey)
+        thresholdFilter.setValue(0.7, forKey: "inputThreshold")
+        guard let thresholdedImage = thresholdFilter.outputImage else { return }
+
+        // Convert CIImage to CGImage
+        guard let cgImage = context.createCGImage(thresholdedImage, from: thresholdedImage.extent) else { return }
+
         DispatchQueue.main.async {
-            let newFrame = NSImage(cgImage: cgImage!, size: NSSize(width: ciImage.extent.width, height: ciImage.extent.height))
+            let newFrame = NSImage(cgImage: cgImage, size: NSSize(width: thresholdedImage.extent.width, height: thresholdedImage.extent.height))
             self.currentFrame = newFrame // Update the current frame
             self.frames.append(newFrame) // Append the new frame to the array
             if self.frames.count > 30 { // If the array has more than 30 frames, remove the first one
@@ -119,5 +129,6 @@ class CameraViewModel: NSObject, ObservableObject, AVCaptureVideoDataOutputSampl
             }
         }
     }
+
 }
 
