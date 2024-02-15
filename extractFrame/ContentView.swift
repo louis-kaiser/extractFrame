@@ -17,8 +17,11 @@ struct ContentView: View {
                     .aspectRatio(16/9, contentMode: .fit)
             } else {
                 Text("Wait until all Frames are loded")
+                    .foregroundStyle(Color.white)
+                    .padding()
             }
         }
+        .background(Color.black)
         .ignoresSafeArea(.all)
         .onAppear {
             cameraViewModel.startCapture()
@@ -36,7 +39,6 @@ struct FramesView: View {
                 Image(nsImage: cameraViewModel.frames[index])
                     .resizable()
                     .blendMode(.screen) // screen or lighten
-                    .background(Color.black)
             }
         }
     }
@@ -97,11 +99,12 @@ class CameraViewModel: NSObject, ObservableObject, AVCaptureVideoDataOutputSampl
             // Apply gaussian blur for smoothing
             let blurFilter = CIFilter(name: "CIGaussianBlur")!
             blurFilter.setValue(contrastAdjusted, forKey: kCIInputImageKey)
-            blurFilter.setValue(5.0, forKey: kCIInputRadiusKey) // Adjust blur radius as needed
+            blurFilter.setValue(3.0, forKey: kCIInputRadiusKey) // Adjust blur radius as needed
             guard let blurredImage = blurFilter.outputImage else { return }
         
         // Apply threshold filter
         let thresholdFilter = CIFilter(name: "CIColorThreshold")!
+        //thresholdFilter.setValue(ciImage, forKey: kCIInputImageKey)    // No Blur Filter
         thresholdFilter.setValue(blurredImage, forKey: kCIInputImageKey) // Apply Blur Filter
         thresholdFilter.setValue(0.7, forKey: "inputThreshold")
         guard let thresholdedImage = thresholdFilter.outputImage else { return }
