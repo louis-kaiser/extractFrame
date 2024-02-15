@@ -14,12 +14,12 @@ struct ContentView: View {
         VStack {
             if cameraViewModel.frames.count >= 30 {
                 FramesView(cameraViewModel: cameraViewModel)
+                    .aspectRatio(16/9, contentMode: .fit)
             } else {
                 Text("Wait until all Frames are loded")
             }
         }
         .ignoresSafeArea(.all)
-        .background(Color.black)
         .onAppear {
             cameraViewModel.startCapture()
         }
@@ -36,7 +36,7 @@ struct FramesView: View {
                 Image(nsImage: cameraViewModel.frames[index])
                     .resizable()
                     .blendMode(.screen) // screen or lighten
-                    .aspectRatio(contentMode: .fit)
+                    .background(Color.black)
             }
         }
     }
@@ -100,7 +100,7 @@ class CameraViewModel: NSObject, ObservableObject, AVCaptureVideoDataOutputSampl
             let newFrame = NSImage(cgImage: cgImage, size: NSSize(width: thresholdedImage.extent.width, height: thresholdedImage.extent.height))
             self.currentFrame = newFrame // Update the current frame
             self.frames.append(newFrame) // Append the new frame to the array
-            if self.frames.count > 30 { // If the array has more than 30 frames, remove the first one
+            if self.frames.count > 30 { // If the array has more than the defined frames, remove the first frame
                 self.frames.removeFirst()
             }
         }
